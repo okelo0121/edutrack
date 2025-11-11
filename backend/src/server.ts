@@ -20,10 +20,26 @@ const PORT = parseInt(process.env.PORT || '3000', 10);
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/present-smart';
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:8080',           // local frontend
+  'http://localhost:5173',           // optional Vite dev server
+  'https://edutrackst.vercel.app'   // deployed frontend
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function(origin, callback) {
+    // allow requests with no origin (like Postman, curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed for this origin'));
+    }
+  },
   credentials: true
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
